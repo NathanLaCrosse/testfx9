@@ -6,7 +6,6 @@
 // In this copy, the bot will make a move to check how good it is
 // To prevent many copies being made, the bot should also be able to undo a move
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,37 +15,74 @@ public class Board {
 
     private int dimX;
     private int dimY;
-    
-    private BoardNode bottomLeft;
-    private HashMap<String, BoardNode> board; // designed to have quick access to each node
 
-    private LinkedList<ChessPiece> allPieces; // needed for searching for a given piece
+    private String[][] identifierMap; // contains a string representing a piece
+    private HashMap<String, ChessPiece> pieceMap;
+
     private LinkedList<ChessPiece> whitePieces;
     private LinkedList<ChessPiece> blackPieces;
 
+    // don't need to worry about these after setting up due to aliases in the king's Pos
     private ChessPiece whiteKing = null;
     private ChessPiece blackKing = null;
 
     public Board(int dimX, int dimY) {
-        board = new HashMap<>();
-
-        buildBoard(dimX, dimY);
+        pieceMap = new HashMap<>();
         
-        allPieces = new LinkedList<>();
         whitePieces = new LinkedList<>();
         blackPieces = new LinkedList<>();
 
         this.dimX = dimX;
         this.dimY = dimY;
+
+        initializeBoard();
     }
     public Board() {
         this(8,8);
     }
 
-    public BoardNode getBottomLeftNode() {
-        return bottomLeft;
+    // initialize board based on dimX, dimY and a preloaded board
+    // TODO: create "preloaded boards" - probably with a String
+    private void initializeBoard() {
+        identifierMap = new String[8][8];
+
+        for(int i = 0; i < identifierMap.length; i++) {
+            for(int k = 0; k < identifierMap[0].length; k++) { // assumes a rectangular region
+                identifierMap[i][k] = "";
+            }
+        }
+
+        // TODO: get rid of this testing code and properly set up the board
+        // first character is important: W = white, B = black
+        identifierMap[7][3] = "WKing";
+        //identifierMap[7][7] = "WRook";
+        identifierMap[0][0] = "BKing";
+        identifierMap[7][4] = "BRook";
+        identifierMap[4][7] = "BBishop";
+
+        ChessPiece whiteKing = new King(this, new Pos(7,3), true);
+        //ChessPiece whiteRook = new ChessPiece(this, new Pos(7,7), "Rook", true, 5, ChessPiece.ROOK_MOVES);
+        ChessPiece blackKing = new King(this, new Pos(0, 0), false);
+        ChessPiece blackRook = new ChessPiece(this, new Pos(7,4), "Rook", false, 5, ChessPiece.ROOK_MOVES);
+        ChessPiece blackBishop = new ChessPiece(this, new Pos(4,7), "Bishop", false, 3, ChessPiece.BISHOP_MOVES);
+
+        pieceMap.put("WKing", whiteKing);
+        //pieceMap.put("WRook", whiteRook);
+        pieceMap.put("BKing", blackKing);
+        pieceMap.put("BRook", blackRook);
+        pieceMap.put("BBishop", blackBishop);
+
+        this.whiteKing = whiteKing;
+        this.blackKing = blackKing;
+
+        whitePieces.add(whiteKing);
+        //whitePieces.add(whiteRook);
+        blackPieces.add(blackKing);
+        blackPieces.add(blackRook);
+        blackPieces.add(blackBishop);
+        
     }
-    
+
     public LinkedList<ChessPiece> getPiecesOnSide(boolean side) {
         if(side) {
             return whitePieces;
@@ -61,97 +97,36 @@ public class Board {
     public int getDimY() {
         return dimY;
     }
-
-    // sets up the board with a certain dimension (has to be rectangular) and links all nodes together
-    public void buildBoard(int dimX, int dimY) {
-        bottomLeft = new BoardNode("a1");
-        board.put(bottomLeft.getName(), bottomLeft);
-
-        buildFirstRank(bottomLeft, 'a', 2, dimX);
-
-        buildRemainingRanks(bottomLeft, dimX, dimY, 1);
-    }
-    // builds first rank assuming the first node in the rank has already been created
-    public void buildFirstRank(BoardNode start, char rank, int fileNum, int maxFile) {
-        if(maxFile - fileNum < 0) return;
-
-        BoardNode next = new BoardNode("" + rank + fileNum);
-        start.east = next;
-        next.west = start;
-        board.put(next.getName(), next);
-
-        buildFirstRank(start.east, rank, fileNum + 1, maxFile);
-    }
-    // builds the rest of the board on top of the first rank
-    public void buildRemainingRanks(BoardNode start, int dimX, int dimY, int currentRank) {
-        if(dimY - currentRank - 1 < 0) return;
-
-        char rankName = (char)(A_VAL + currentRank);
-
-        BoardNode firstInRank =  new BoardNode(rankName + "1");
-        start.north = firstInRank;
-        firstInRank.south = start;
-        board.put(firstInRank.getName(), firstInRank);
-
-        buildAndConnectRank(firstInRank, start, rankName, 2, dimX);
-
-        buildRemainingRanks(firstInRank, dimX, dimY, currentRank + 1);
-    }
-    // builds an individual rank and properly connects it with the rank below
-    public void buildAndConnectRank(BoardNode startAbove, BoardNode startBelow, char rank, int fileNum, int maxFile) {
-        if(maxFile - fileNum < 0) return;
-
-        BoardNode next = new BoardNode("" + rank + fileNum);
-        startAbove.east = next;
-        next.west = startAbove;
-        next.south = startBelow.east;
-        startBelow.east.north = next;
-        board.put(next.getName(), next);
-
-        buildAndConnectRank(next, startBelow.east, rank, fileNum + 1, maxFile);
+    public String[][] getIdentifierMap() {
+        return identifierMap;
     }
 
-    // finds the tile with the given name - use hash map
-    public BoardNode findNode(String name) {
-        return board.get(name);
+    public boolean inBounds(Pos p) {
+        return p.first() < dimY && p.first() > -1 && p.second() < dimX && p.second() > -1;
     }
-    // finds a piece if it exists on a tile with the given name, if it exists
-    // due to the volatility of a piece's position, we can't store them in an ordered collection
-    public ChessPiece findPiece(String name) {
-        for(ChessPiece piece : allPieces) {
-            if(piece.currentSquare.equals(name)) return piece;
-        }
-        return null;
+    public void setIdentifierAtPos(Pos p, String newVal) {
+        identifierMap[p.first()][p.second()] = newVal;
+    }
+    public String getIdentifierAtPos(Pos p) {
+        return identifierMap[p.first()][p.second()];
     }
 
-    public void addPieceToBoard(ChessPiece piece, String spotName) {
-        addPieceToBoard(piece, findNode(spotName));
+    public Pos createPosThroughString(String str) {
+        int firstDex = (int)str.charAt(0) - A_VAL;
+        int secondDex = Integer.parseInt(str.substring(1)) - 1;
+        return new Pos(firstDex, secondDex);
     }
-    public void addPieceToBoard(ChessPiece piece, BoardNode spot) {
-        piece.setStartingLocation(spot);
-        allPieces.add(piece);
-        
-        if(piece.getSide()) {
-            whitePieces.add(piece);
-            if(piece.getName().equals("King")) whiteKing = piece;
-        }else {
-            blackPieces.add(piece);
-            if(piece.getName().equals("King")) blackKing = piece;
-        }
+    public String createStringThroughPos(Pos pos) {
+        char c = (char)(A_VAL + (dimY - 1) - pos.first());
+        return "" + c + (pos.second() + 1);
     }
 
-    // recursive method to clear all attacks forom the board nodes
-    private void clearAttacks(BoardNode start) {
-        if(start == null) return;
-        start.clearAttacks();
-
-        // traverse the board recursively
-        if(start.south == null) {
-            clearAttacks(start.north);
-            clearAttacks(start.east);
-        }else {
-            clearAttacks(start.north);
-        }
+    // finds a piece given its identifier from identifierMap
+    ChessPiece retrievePiece(String identifier) {
+        return pieceMap.get(identifier);
+    }
+    ChessPiece retrievePiece(Pos pos) {
+        return pieceMap.get(identifierMap[pos.first()][pos.second()]);
     }
 
     // generates moves and makes sure they do not cause the player to lose
@@ -164,36 +139,37 @@ public class Board {
 
         // we need to check each possible move and see whether or not it will land us in check, which would cause a player to walk into checkmate
         for(ChessPiece myPiece : myPieces) {
-            myPiece.generateMoves(this);
-            LinkedList<Move> possibleMoves = myPiece.getMoves();
-
-            for(Move m : possibleMoves) {
+            myPiece.generateMoves();
+            HashMap<Pos, Move> possibleMoves = myPiece.getMoves();
+            
+            for(Move m : possibleMoves.values()) {
                 boolean checkPresent = false;
                 Iterator<ChessPiece> itr = enemyPieces.iterator();
 
                 // make move to test this new board state
-                clearAttacks(bottomLeft);
-                m.move(this);
+                m.move();
 
-                // check all enemy moves to see if they cause a check
+                // check all enemy moves to see if they cause a check (a move can go to our king's square)
                 while(itr.hasNext() && !checkPresent) {
-                    itr.next().generateMoves(this);
-                    checkPresent = findNode(myKing.currentSquare).isAttacked(side);
+                    ChessPiece enemy = itr.next();
+                    enemy.generateMoves();
+                    checkPresent = enemy.attacksSquare(myKing.currentPos);
                 }
 
                 // undo the move once we're done with it
-                m.undoMove(this);
+                m.undoMove();
 
                 // properly handle the move if it is a castle
                 if(m instanceof Castle && !checkPresent) {
-                    clearAttacks(bottomLeft);
                     itr = enemyPieces.iterator();
 
-                    while(itr.hasNext()) {
-                        itr.next().generateMoves(this);
-                    }
+                    Castle c = (Castle)m;
 
-                    checkPresent = findNode(((Castle)m).getRookDest()).isAttacked(side) || findNode(m.originalPosition).isAttacked(side); // negated because if it is valid it will be false
+                    while(itr.hasNext() && !checkPresent) {
+                        ChessPiece enemy = itr.next();
+                        enemy.generateMoves();
+                        checkPresent = enemy.attacksSquare(c.getRookDest()) || enemy.attacksSquare(myKing.currentPos);
+                    }
                 }
 
                 // only add this move to our sanitized list if it doesn't lead into a check
@@ -208,25 +184,13 @@ public class Board {
 
     @Override
     public String toString() {
-        ArrayList<String> ranks = new ArrayList<>();
-
-        BoardNode currentRank = bottomLeft;
-        while(currentRank != null) {
-            ranks.add(getStringFromRank(currentRank));
-            currentRank = currentRank.north;
-        }
-
         String str = "";
-
-        for(int i = ranks.size() - 1; i >= 0; i--) {
-            str += ranks.get(i) + "\n";
+        for(int i = 0; i < dimY; i++) {
+            for(int k = 0; k < dimX; k++) {
+                str += "" + (char)(A_VAL + dimY - 1 - i) + (k + 1) + " ";
+            }
+            str += "\n";
         }
-
         return str;
-    }
-    // recursively add all strings on a given rank
-    private String getStringFromRank(BoardNode current) {
-        if(current == null) {return "";}
-        return current + " " + getStringFromRank(current.east);
     }
 }

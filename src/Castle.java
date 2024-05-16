@@ -1,30 +1,40 @@
 // stores extra data than the move class to allow for moving/unmoving a castle
 public class Castle extends Move {
-    private ChessPiece rook;
-    private String rookOriginalPosition;
-    private String rookDest;
+    private String rookIdentifier;
+    private Pos rookOriginalPosition;
+    private Pos rookDest;
 
-    public Castle(String destination, String originalPosition, ChessPiece movingPiece, ChessPiece rook, String rookOriginalPosition, String rookDest) {
-        super(destination, originalPosition, movingPiece, null);
+    public Castle(Board referenceBoard, Pos destination, Pos originalPosition, String movingIdentifier, Pos rookDest, Pos rookOriginalPosition, String rookIdentifier) {
+        super(referenceBoard, destination, originalPosition, movingIdentifier, null);
 
-        this.rook = rook;
-        this.rookOriginalPosition = rookOriginalPosition;
-        this.rookDest = rookDest;
+        this.rookDest = new Pos(rookDest);
+        this.rookOriginalPosition = new Pos(rookOriginalPosition);
+        this.rookIdentifier = rookIdentifier;
     }
     
     @Override
-    public void move(Board b) {
-        movingPiece.currentSquare = destination;
-        rook.currentSquare = rookDest;
+    public void move() {
+        referenceBoard.retrievePiece(originalPosition).currentPos = destination;
+        referenceBoard.retrievePiece(rookOriginalPosition).currentPos = rookDest;
+
+        referenceBoard.setIdentifierAtPos(originalPosition, null);
+        referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
+        referenceBoard.setIdentifierAtPos(rookOriginalPosition, null);
+        referenceBoard.setIdentifierAtPos(rookDest, rookIdentifier);
     }
 
     @Override
-    public void undoMove(Board b) {
-        movingPiece.currentSquare = destination;
-        rook.currentSquare = rookOriginalPosition;
+    public void undoMove() {
+        referenceBoard.retrievePiece(destination).currentPos = originalPosition;
+        referenceBoard.retrievePiece(rookDest).currentPos = rookOriginalPosition;
+
+        referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
+        referenceBoard.setIdentifierAtPos(destination, null);
+        referenceBoard.setIdentifierAtPos(rookOriginalPosition, rookIdentifier);
+        referenceBoard.setIdentifierAtPos(rookDest, null);
     }
 
-    public String getRookDest() {
+    public Pos getRookDest() {
         return rookDest;
     }
 }

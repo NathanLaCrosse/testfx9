@@ -5,21 +5,9 @@ import javafx.stage.Stage;
 
 public class App extends Application {
     public static void main(String[] args) throws Exception {
+
         Board b = new Board();
         System.out.println(b);
-
-        ChessPiece whiteKing = new King(b, true);
-        ChessPiece blackKing = new King(b, false);
-
-        //ChessPiece allyPawn = new Pawn(b, true);
-        ChessPiece allyRook = new ChessPiece(b, "Rook", true, 5, ChessPiece.ROOK_MOVES);
-        ChessPiece enemyRook =  new ChessPiece(b, "Rook", false, 5, ChessPiece.ROOK_MOVES);
-
-        b.addPieceToBoard(whiteKing, "a4");
-        b.addPieceToBoard(blackKing, "h1");
-        //b.addPieceToBoard(allyPawn, "b3");
-        b.addPieceToBoard(enemyRook, "c5");
-        b.addPieceToBoard(allyRook, "a8");
 
         System.out.println(b.generateSanitizedMovesForSide(true));
 

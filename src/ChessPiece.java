@@ -1,6 +1,6 @@
 // class that represents a given chess piece
 
-import java.util.LinkedList;
+import java.util.HashMap;
 
 public class ChessPiece {
     public static final String[] KNIGHT_MOVES = new String[]{"C|NNW","C|NNE","C|EEN","C|EES","C|SSW","C|SSE","C|WWN","C|WWS"};
@@ -15,8 +15,8 @@ public class ChessPiece {
 
     // these two variables hold the "name" of a given square which can be used to search the board for
     // its current location
-    protected String startingSquare;
-    protected String currentSquare;
+    protected Pos startingPos;
+    protected Pos currentPos;
 
     private String name;
 
@@ -28,9 +28,9 @@ public class ChessPiece {
     // ex: L|NE repeats the move north, east until reaching end of board
     private String[] moveInstructions;
 
-    protected LinkedList<Move> moves; // moves will be used infrequently, so using a linked list for fast addition + removal
+    protected HashMap<Pos, Move> moves; // moves will be used infrequently, so using a linked list for fast addition + removal
 
-    public ChessPiece(Board referenceBoard, String name, boolean side, int material, String[] moveInstructions) {
+    public ChessPiece(Board referenceBoard, Pos startingPos, String name, boolean side, int material, String[] moveInstructions) {
         this.referenceBoard = referenceBoard;
 
         this.name = name;
@@ -38,10 +38,10 @@ public class ChessPiece {
         this.material = material;
         this.moveInstructions = moveInstructions;
 
-        moves = new LinkedList<>();
+        moves = new HashMap<>();
 
-        startingSquare = "?-1";
-        currentSquare = "?-1";
+        this.startingPos = startingPos;
+        this.currentPos = new Pos(startingPos);
     }
 
     public String getName() {
@@ -53,29 +53,22 @@ public class ChessPiece {
     public int getMaterial() {
         return material;
     }
-    public LinkedList<Move> getMoves() {
+    public HashMap<Pos, Move> getMoves() {
         return moves;
     }
     public boolean hasMoved() {
-        return !startingSquare.equals(currentSquare);
+        return !startingPos.equals(currentPos);
     }
 
-    public void setStartingLocation(BoardNode node) {
-        currentSquare = node.getName();
-        startingSquare = node.getName();
-    }
-
-    public boolean captured() {
-        return referenceBoard.findNode(currentSquare) == null;
+    public boolean attacksSquare(Pos pos) {
+        return moves.get(pos) != null;
     }
 
     // stores all valid moves in the moves linkedlist
     // this method returns the node the piece is currently on to be used in any derived classes
-    public BoardNode generateMoves(Board b) {
-        BoardNode currentNode = referenceBoard.findNode(currentSquare);
-        if(currentNode == null) return null; // in case this piece is off grid (captured)
-
-        moves = new LinkedList<>();
+    public void generateMoves() {
+        moves = new HashMap<>();
+        if(currentPos == null) return;
 
         for(int i = 0; i < moveInstructions.length; i++) {
             boolean nonLoopingFlag = false;
@@ -99,23 +92,22 @@ public class ChessPiece {
                 sequence = Integer.parseInt(modifier.substring(modifier.indexOf("I") + 1, modifier.indexOf("I") + 2));
             }
 
-            // a starting sequences either repeats ex: SI3|NE
+            // a starting sequence repeats only when it hasnt moved (there will still be one move if it has moved) ex: SI3|NE
             boolean startingSequence = modifier.indexOf("SI") != -1;
 
             if(!startingSequence && startingMove && !hasMoved()) continue; // skip over this starting move if we've already moved (excludes a starting sequence)
 
-            BoardNode moveDest = findDest(directions, currentNode);
-            while(moveDest != null && (!nonLoopingFlag || loop || (sequenceCounter < sequence && (!startingSequence || !hasMoved())))) {
-                ChessPiece destPiece = b.findPiece(moveDest.getName());
+            // find a possible move but stop if not looping/come into contact with another piece
+            Pos destCoords = findDestCoords(directions, currentPos);
+            while(referenceBoard.inBounds(destCoords) && (!nonLoopingFlag || loop || (sequenceCounter < sequence && (!startingSequence || !hasMoved())))) {
+                ChessPiece destPiece = referenceBoard.retrievePiece(destCoords);
 
                 if(destPiece == null) {
                     if(onlyCapture) break;
 
-                    moves.add(new Move(moveDest.getName(), currentSquare, this, destPiece));
-                    moveDest.attack(side);
+                    moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(destCoords)));
                 }else if(destPiece.side != side && (canCapture || onlyCapture)) {
-                    moves.add(new Move(moveDest.getName(), currentSquare, this, destPiece));
-                    moveDest.attack(side);
+                    moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(destCoords)));
 
                     break;
                 }else {
@@ -124,46 +116,53 @@ public class ChessPiece {
 
                 nonLoopingFlag = true;
                 if(loop || sequenceCounter < sequence) {
-                    moveDest = findDest(directions, moveDest);
+                    destCoords = findDestCoords(directions, destCoords);
                 }
 
                 sequenceCounter++;
             }
         }
-
-        return currentNode;
     }
     // recursively traverse the board using the instruction as a guide
-    private BoardNode findDest(String instruction, BoardNode visit) {
-        if(visit == null || instruction.length() < 1) return visit;
+    private Pos findDestCoords(String instruction, Pos pos) {
+        Pos dest = new Pos(pos);
 
-        switch(instruction.charAt(0)) {
-            case 'N':
-                if(side) {
-                    return findDest(instruction.substring(1), visit.north);
-                }else {
-                    return findDest(instruction.substring(1), visit.south);
-                }
-            case 'S':
-                if(side) {
-                    return findDest(instruction.substring(1), visit.south);
-                }else {
-                    return findDest(instruction.substring(1), visit.north);
-                }
-            case 'E':
-                if(side) {
-                    return findDest(instruction.substring(1), visit.east);
-                }else {
-                    return findDest(instruction.substring(1), visit.west);
-                }
-            case 'W':
-                if(side) {
-                    return findDest(instruction.substring(1), visit.west);
-                }else {
-                    return findDest(instruction.substring(1), visit.east);
-                }
+        // traverse the identifier map using the instructions
+        for(int i = 0; i < instruction.length(); i++) {
+            char c = instruction.charAt(i);
+
+            switch (c) {
+                case 'N':
+                    if(side) {
+                        dest.moveNorth();
+                    }else {
+                        dest.moveSouth();
+                    }
+                    break;
+                case 'S':
+                    if(side) {
+                        dest.moveSouth();
+                    }else {
+                        dest.moveNorth();
+                    }
+                    break;
+                case 'E':
+                    if(side) {
+                        dest.moveEast();
+                    }else {
+                        dest.moveWest();
+                    }
+                    break;
+                default: // 'W' case (default = else)
+                    if(side) {
+                        dest.moveWest();
+                    }else {
+                        dest.moveEast();
+                    }
+                    break;
+            }
         }
 
-        return null; // this line should never be reached (always one of 4 cases)
+        return dest;
     }
 }

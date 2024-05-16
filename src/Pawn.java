@@ -4,35 +4,32 @@ public class Pawn extends ChessPiece {
     // TODO: Add a check later on to change this flag
     private boolean madeStartingMoveLastTurn = false;
 
-    public Pawn(Board referenceBoard, boolean side) {
-        super(referenceBoard, "Pawn", side, 1, DEFAULT_PAWN_MOVES);
+    public Pawn(Board referenceBoard, Pos startingPos, boolean side) {
+        super(referenceBoard, startingPos, "Pawn", side, 1, DEFAULT_PAWN_MOVES);
     }
     
     @Override
-    public BoardNode generateMoves(Board b) {
-        BoardNode currentNode = super.generateMoves(b); // find default moves
-        if(currentNode == null) return null; // in case this piece is off grid (captured)
+    public void generateMoves() {
+        super.generateMoves(); // find default moves
 
         // special case: en passant
         // can capture pawn and move forward one if it used its starting move last turn
-        BoardNode[] possibleTargets = new BoardNode[]{currentNode.west, currentNode.east};
+        Pos[] possibleTargets = new Pos[]{currentPos.returnModified(-1, 0), currentPos.returnModified(1, 0)};
 
         for(int i = 0; i < possibleTargets.length; i++) {
-            if(possibleTargets[i] == null) continue; // skip over nodes outside of map
+            if(!referenceBoard.inBounds(possibleTargets[i])) continue; // skip over nodes outside of map
 
-            ChessPiece possiblePiece = b.findPiece(possibleTargets[i].getName());
+            ChessPiece possiblePiece = referenceBoard.retrievePiece(possibleTargets[i]);
             if(possiblePiece != null && possiblePiece.getSide() != side && possiblePiece instanceof Pawn && ((Pawn)possiblePiece).madeStartingMoveLastTurn) {
-                BoardNode dest = null; 
+                Pos dest = null; 
                 if(side) {
-                    dest = possibleTargets[i].north;
+                    dest = currentPos.returnModified(0, -1);
                 }else {
-                    dest = possibleTargets[i].south;
+                    dest = currentPos.returnModified(0, 1);
                 }
 
-                moves.add(new EnPassant(dest.getName(), currentSquare, this, possiblePiece, possibleTargets[i].getName()));
+                moves.put(dest, new EnPassant(referenceBoard, dest, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(possibleTargets[i]), possibleTargets[i]));
             }
         }
-
-        return null;
     }
 }
