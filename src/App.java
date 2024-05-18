@@ -6,10 +6,16 @@ import javafx.stage.Stage;
 public class App extends Application {
     public static void main(String[] args) throws Exception {
 
-        Board b = new Board();
-        System.out.println(b);
+        GameController gc = new GameController(new RandBot(), new RandBot());
 
-        System.out.println(b.generateSanitizedMovesForSide(true));
+        System.out.println("Before moves: ");
+        System.out.println(gc);
+
+        gc.nextTurn();
+        gc.nextTurn();
+
+        System.out.println("After Moves: ");
+        System.out.println(gc);
 
         //King k = new King(b, true);
         //ChessPiece enemy = new ChessPiece(b, "Rook", false, 5, ChessPiece.ROOK_MOVES);

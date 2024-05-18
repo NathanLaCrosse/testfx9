@@ -29,6 +29,7 @@ public class ChessPiece {
     private String[] moveInstructions;
 
     protected HashMap<Pos, Move> moves; // moves will be used infrequently, so using a linked list for fast addition + removal
+    private HashMap<Pos, Move> tempSanitizedMoves; // this will be assigned by the board when it sanitizes our moves so they are valid
 
     public ChessPiece(Board referenceBoard, Pos startingPos, String name, boolean side, int material, String[] moveInstructions) {
         this.referenceBoard = referenceBoard;
@@ -39,6 +40,7 @@ public class ChessPiece {
         this.moveInstructions = moveInstructions;
 
         moves = new HashMap<>();
+        tempSanitizedMoves = new HashMap<>();
 
         this.startingPos = startingPos;
         this.currentPos = new Pos(startingPos);
@@ -62,6 +64,10 @@ public class ChessPiece {
 
     public boolean attacksSquare(Pos pos) {
         return moves.get(pos) != null;
+    }
+
+    public void removeMove(Pos p) {
+        moves.remove(p);
     }
 
     // stores all valid moves in the moves linkedlist
@@ -164,5 +170,10 @@ public class ChessPiece {
         }
 
         return dest;
+    }
+
+    @Override
+    public String toString() {
+        return (side ? "White " : "Black ") + name + " At " + referenceBoard.createStringThroughPos(currentPos);
     }
 }

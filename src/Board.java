@@ -1,10 +1,7 @@
 // defines the Board class which is comprised of a bunch of BoardNodes
 // contains various methods to modify entire board
 
-// NOTES FOR WHEN WORKING ON A CHESS BOT
-// The board should be able to make a copy of itself for the bot to use
-// In this copy, the bot will make a move to check how good it is
-// To prevent many copies being made, the bot should also be able to undo a move
+// TODO: add win/loss conditions to the game
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -137,6 +134,8 @@ public class Board {
 
         LinkedList<Move> sanitizedList = new LinkedList<>();
 
+        LinkedList<Move> destroyList = new LinkedList<>();
+
         // we need to check each possible move and see whether or not it will land us in check, which would cause a player to walk into checkmate
         for(ChessPiece myPiece : myPieces) {
             myPiece.generateMoves();
@@ -175,8 +174,19 @@ public class Board {
                 // only add this move to our sanitized list if it doesn't lead into a check
                 if(!checkPresent) {
                     sanitizedList.add(m);
+                }else {
+                    destroyList.add(m);
                 }
             }
+        }
+
+        // get rid of moves that are not valid - they cause checks
+        while(destroyList.size() > 0) {
+            Move destroyMove = destroyList.getFirst();
+            ChessPiece piece = retrievePiece(destroyMove.movingIdentifier);
+
+            piece.removeMove(destroyMove.destination);
+            destroyList.removeFirst();
         }
 
         return sanitizedList;

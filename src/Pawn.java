@@ -1,7 +1,6 @@
 // this class provides some unique functionality to the pawn piece
 // this is required as the en passant move requires some extra functionality
 public class Pawn extends ChessPiece {
-    // TODO: Add a check later on to change this flag
     private boolean madeStartingMoveLastTurn = false;
 
     public Pawn(Board referenceBoard, Pos startingPos, boolean side) {
@@ -31,5 +30,17 @@ public class Pawn extends ChessPiece {
                 moves.put(dest, new EnPassant(referenceBoard, dest, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(possibleTargets[i]), possibleTargets[i]));
             }
         }
+    }
+
+    // this method enables the en passant flag if this piece has just moved
+    public void checkIfUsedStartingMove() {
+        if((int)Math.abs(currentPos.first() - startingPos.first()) == 2) {
+            madeStartingMoveLastTurn = true;
+        }else {
+            madeStartingMoveLastTurn = false;
+        }
+    }
+    public void disableEnPasantFlag() {
+        madeStartingMoveLastTurn = false;
     }
 }

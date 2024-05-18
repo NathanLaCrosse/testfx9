@@ -1,4 +1,7 @@
 // combines data detailing a specific move - also handles making moves on a given board
+
+import java.util.Objects;
+
 public class Move {
     protected Pos destination;
     protected Pos originalPosition; // in regards to moving piece
@@ -18,7 +21,14 @@ public class Move {
 
     // executes the move
     public void move() {
-        referenceBoard.retrievePiece(originalPosition).currentPos = destination;
+        // en passant checks (enable/disable flag)
+        ChessPiece movingPiece = referenceBoard.retrievePiece(originalPosition);
+        if(movingPiece instanceof Pawn) {
+            Pawn p = (Pawn)movingPiece;
+            p.checkIfUsedStartingMove();
+        }
+
+        movingPiece.currentPos = destination;
         storedCapture = referenceBoard.retrievePiece(destination);
         if(storedCapture != null) storedCapture.currentPos = null;
 
@@ -28,7 +38,14 @@ public class Move {
 
     // undos the move - assumes this in done in the correct order (no other moves made)
     public void undoMove() {
-        referenceBoard.retrievePiece(destination).currentPos = originalPosition;
+        // disable any enabled en passant flag
+        ChessPiece movingPiece = referenceBoard.retrievePiece(destination);
+        if(movingPiece instanceof Pawn) {
+            Pawn p = (Pawn)movingPiece;
+            p.disableEnPasantFlag();
+        }
+
+        movingPiece.currentPos = originalPosition;
         if(storedCapture != null) storedCapture.currentPos = destination;
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
@@ -38,5 +55,15 @@ public class Move {
     @Override 
     public String toString() {
         return "Moving From " + referenceBoard.createStringThroughPos(originalPosition) + " To " + referenceBoard.createStringThroughPos(destination);
+    }
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof Move)) return false;
+        Move m = (Move)o;
+        return m.originalPosition.equals(originalPosition) && m.destination.equals(destination);
+    }
+    @Override 
+    public int hashCode() {
+        return Objects.hash(originalPosition, destination);
     }
 }
