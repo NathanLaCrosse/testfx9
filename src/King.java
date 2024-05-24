@@ -19,7 +19,8 @@ public class King extends ChessPiece {
             ChessPiece rookPartner = referenceBoard.retrievePiece(possiblePosi[i]);
             if(rookPartner == null || rookPartner.side != side || !rookPartner.getName().equals("Rook")) continue; // skip over this possible castle
 
-            if(!rookPartner.hasMoved()) {
+            // TODO: I am unsure whether the clear line of sight works properly yet - untested
+            if(!rookPartner.hasMoved() && hasClearLineOfSight(currentPos.second(), i == 0 ? -1 : 1, possiblePosi[i].second(), currentPos.first(), referenceBoard.getIdentifierMap())) {
                 Pos destKing = currentPos.returnModified(0, 2 * (i == 0 ? -1 : 1));
                 Pos destRook = currentPos.returnModified(0, i == 0 ? -1 : 1);
 
@@ -28,5 +29,12 @@ public class King extends ChessPiece {
                 moves.put(destKing, new Castle(referenceBoard, destKing, currentPos, referenceBoard.getIdentifierAtPos(currentPos), destRook, possiblePosi[i], referenceBoard.getIdentifierAtPos(possiblePosi[i])));
             }
         }
+    }
+
+    // checks for a clear line of sight between the king and the rook
+    public boolean hasClearLineOfSight(int index, int direction, int stopOnDex, int row, String[][] idMap) {
+        if(index + direction == stopOnDex) return true;
+
+        return idMap[row][index + direction].equals("") && hasClearLineOfSight(index + (2 * direction), direction, stopOnDex, row, idMap);
     }
 }

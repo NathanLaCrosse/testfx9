@@ -32,7 +32,7 @@ public class Move {
         storedCapture = referenceBoard.retrievePiece(destination);
         if(storedCapture != null) storedCapture.currentPos = null;
 
-        referenceBoard.setIdentifierAtPos(originalPosition, null);
+        referenceBoard.setIdentifierAtPos(originalPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
     }
 

@@ -5,7 +5,7 @@ public class Castle extends Move {
     private Pos rookDest;
 
     public Castle(Board referenceBoard, Pos destination, Pos originalPosition, String movingIdentifier, Pos rookDest, Pos rookOriginalPosition, String rookIdentifier) {
-        super(referenceBoard, destination, originalPosition, movingIdentifier, null);
+        super(referenceBoard, destination, originalPosition, movingIdentifier, "");
 
         this.rookDest = new Pos(rookDest);
         this.rookOriginalPosition = new Pos(rookOriginalPosition);
@@ -17,9 +17,9 @@ public class Castle extends Move {
         referenceBoard.retrievePiece(originalPosition).currentPos = destination;
         referenceBoard.retrievePiece(rookOriginalPosition).currentPos = rookDest;
 
-        referenceBoard.setIdentifierAtPos(originalPosition, null);
+        referenceBoard.setIdentifierAtPos(originalPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
-        referenceBoard.setIdentifierAtPos(rookOriginalPosition, null);
+        referenceBoard.setIdentifierAtPos(rookOriginalPosition, "");
         referenceBoard.setIdentifierAtPos(rookDest, rookIdentifier);
     }
 
@@ -29,9 +29,9 @@ public class Castle extends Move {
         referenceBoard.retrievePiece(rookDest).currentPos = rookOriginalPosition;
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
-        referenceBoard.setIdentifierAtPos(destination, null);
+        referenceBoard.setIdentifierAtPos(destination, "");
         referenceBoard.setIdentifierAtPos(rookOriginalPosition, rookIdentifier);
-        referenceBoard.setIdentifierAtPos(rookDest, null);
+        referenceBoard.setIdentifierAtPos(rookDest, "");
     }
 
     public Pos getRookDest() {

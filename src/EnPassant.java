@@ -16,8 +16,8 @@ public class EnPassant extends Move {
         storedCapture = referenceBoard.retrievePiece(destination);
         storedCapture.currentPos = null;
 
-        referenceBoard.setIdentifierAtPos(originalPosition, null);
-        referenceBoard.setIdentifierAtPos(capturedPawnPosition, null);
+        referenceBoard.setIdentifierAtPos(originalPosition, "");
+        referenceBoard.setIdentifierAtPos(capturedPawnPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
     }
 
@@ -27,6 +27,6 @@ public class EnPassant extends Move {
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(capturedPawnPosition, capturedIdentifier);
-        referenceBoard.setIdentifierAtPos(destination, null);
+        referenceBoard.setIdentifierAtPos(destination, "");
     }
 }

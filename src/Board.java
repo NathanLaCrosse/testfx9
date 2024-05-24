@@ -52,19 +52,19 @@ public class Board {
         // TODO: get rid of this testing code and properly set up the board
         // first character is important: W = white, B = black
         identifierMap[7][3] = "WKing";
-        //identifierMap[7][7] = "WRook";
+        identifierMap[7][7] = "WRook";
         identifierMap[0][0] = "BKing";
         identifierMap[7][4] = "BRook";
         identifierMap[4][7] = "BBishop";
 
         ChessPiece whiteKing = new King(this, new Pos(7,3), true);
-        //ChessPiece whiteRook = new ChessPiece(this, new Pos(7,7), "Rook", true, 5, ChessPiece.ROOK_MOVES);
+        ChessPiece whiteRook = new ChessPiece(this, new Pos(7,7), "Rook", true, 5, ChessPiece.ROOK_MOVES);
         ChessPiece blackKing = new King(this, new Pos(0, 0), false);
         ChessPiece blackRook = new ChessPiece(this, new Pos(7,4), "Rook", false, 5, ChessPiece.ROOK_MOVES);
         ChessPiece blackBishop = new ChessPiece(this, new Pos(4,7), "Bishop", false, 3, ChessPiece.BISHOP_MOVES);
 
         pieceMap.put("WKing", whiteKing);
-        //pieceMap.put("WRook", whiteRook);
+        pieceMap.put("WRook", whiteRook);
         pieceMap.put("BKing", blackKing);
         pieceMap.put("BRook", blackRook);
         pieceMap.put("BBishop", blackBishop);
@@ -73,7 +73,7 @@ public class Board {
         this.blackKing = blackKing;
 
         whitePieces.add(whiteKing);
-        //whitePieces.add(whiteRook);
+        whitePieces.add(whiteRook);
         blackPieces.add(blackKing);
         blackPieces.add(blackRook);
         blackPieces.add(blackBishop);

@@ -18,6 +18,10 @@ public class GameController {
         this.player2 = player2;
     }
 
+    public Board getGameBoard() {
+        return gameBoard;
+    }
+
     public void nextTurn() {
         LinkedList<Move> validMoves = gameBoard.generateSanitizedMovesForSide(turn);
 
@@ -28,7 +32,7 @@ public class GameController {
         turn = !turn;
     }
 
-    private Entity currentPlayer() {
+    public Entity currentPlayer() {
         if(turn) {
             return player1;
         }else {
