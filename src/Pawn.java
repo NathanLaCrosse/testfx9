@@ -7,12 +7,13 @@ public class Pawn extends ChessPiece {
         super(referenceBoard, startingPos, "Pawn", side, 1, DEFAULT_PAWN_MOVES);
     }
     
-    // TODO: En passant not working 
     @Override
     public void generateMoves() {
         super.generateMoves(); // find default moves
 
-        if(currentPos == null) return; // return if we are out of bounds
+        if(currentPos == null || !name.contains("Pawn")) return; // return if we are out of bounds or a different piece (due to promotion)
+
+        // code for pawn promotion is found in the ChessPiece move generation code
 
         // special case: en passant
         // can capture pawn and move forward one if it used its starting move last turn

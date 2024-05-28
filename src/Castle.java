@@ -21,6 +21,8 @@ public class Castle extends Move {
         referenceBoard.setIdentifierAtPos(rookOriginalPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
         referenceBoard.setIdentifierAtPos(rookDest, rookIdentifier);
+
+        referenceBoard.fiftyMoveCounter++;
     }
 
     @Override
@@ -32,6 +34,8 @@ public class Castle extends Move {
         referenceBoard.setIdentifierAtPos(rookDest, "");
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(rookOriginalPosition, rookIdentifier);
+
+        referenceBoard.fiftyMoveCounter--;
     }
 
     public Pos getRookDest() {

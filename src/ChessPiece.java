@@ -18,7 +18,7 @@ public class ChessPiece {
     protected Pos startingPos;
     protected Pos currentPos;
 
-    private String name;
+    protected String name;
 
     protected boolean side;
     protected int material;
@@ -26,7 +26,7 @@ public class ChessPiece {
     // a move instruction is comprised of the modifier segment and a set of directions
     // ex: L| is a modifier that makes the move loop 
     // ex: L|NE repeats the move north, east until reaching end of board
-    private String[] moveInstructions;
+    protected String[] moveInstructions;
 
     protected HashMap<Pos, Move> moves; // moves will be used infrequently, so using a linked list for fast addition + removal
 
@@ -112,10 +112,18 @@ public class ChessPiece {
                 if(destPiece == null) {
                     if(onlyCapture) break;
 
-                    moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(destCoords)));
+                    if(this instanceof Pawn && referenceBoard.inPromotionRank(side, destCoords.first()) && name.equals("Pawn")) {
+                        moves.put(destCoords, new PawnPromotion(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), ""));
+                    }else {
+                        moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), ""));
+                    }
                 }else if(destPiece.side != side && (canCapture || onlyCapture)) {
-                    moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(destCoords)));
-
+                    if(this instanceof Pawn && referenceBoard.inPromotionRank(side, destCoords.first()) && name.equals("Pawn")) {
+                        moves.put(destCoords, new PawnPromotion(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(destCoords)));
+                    }else {
+                        moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(destCoords)));
+                    }
+                    
                     break;
                 }else {
                     break;

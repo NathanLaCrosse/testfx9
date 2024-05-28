@@ -1,14 +1,15 @@
 // defines the Board class which is comprised of a bunch of BoardNodes
 // contains various methods to modify entire board
 
-// TODO: add win/loss conditions to the game
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Board {
     private static final int A_VAL = (int)'a';
+
+    // not intended to be altered by a chess bot
+    protected int fiftyMoveCounter = 0;
 
     private int dimX;
     private int dimY;
@@ -134,6 +135,8 @@ public class Board {
     }
 
     public boolean inBounds(Pos p) {
+        if(p == null) return false;
+
         return p.first() < dimY && p.first() > -1 && p.second() < dimX && p.second() > -1;
     }
     public void setIdentifierAtPos(Pos p, String newVal) {
@@ -154,11 +157,79 @@ public class Board {
     }
 
     // finds a piece given its identifier from identifierMap
-    ChessPiece retrievePiece(String identifier) {
+    public ChessPiece retrievePiece(String identifier) {
         return pieceMap.get(identifier);
     }
-    ChessPiece retrievePiece(Pos pos) {
+    public ChessPiece retrievePiece(Pos pos) {
         return pieceMap.get(identifierMap[pos.first()][pos.second()]);
+    }
+
+    // returns true if the position is in the promotion rank for a pawn
+    public boolean inPromotionRank(boolean side, int rank) {
+        if(side) {
+            return rank == 0;
+        }else {
+            return rank == dimY - 1;
+        }
+    }
+
+    /* Code for end states of the board */
+    public boolean inCheck(boolean side) {
+        // if we are in check, then the opponent's pieces should have a previously generated move which attacks our king
+        LinkedList<ChessPiece> enemyPieces = side ? blackPieces : whitePieces;
+        ChessPiece myKing = side ? whiteKing : blackKing;
+
+        for(ChessPiece piece : enemyPieces) {
+            if(piece.attacksSquare(myKing.currentPos)) return true;
+        }
+        return false;
+    }
+    // returns true if there is insufficient material on the board - no checkmates possible
+    // TODO: Test insufficient material cases
+    public boolean insufficientMaterial() {
+        LinkedList<ChessPiece> whitePiecesInBounds = new LinkedList<>();
+        LinkedList<ChessPiece> blackPiecesInBounds = new LinkedList<>();
+
+        for(ChessPiece piece : whitePieces) {
+            if(inBounds(piece.currentPos) && !(piece instanceof King)) {
+                whitePiecesInBounds.add(piece);
+            }
+        }
+        for(ChessPiece piece : blackPieces) {
+            if(inBounds(piece.currentPos) && !(piece instanceof King)) {
+                blackPiecesInBounds.add(piece);
+            }
+        }
+
+        if(whitePiecesInBounds.size() > 1 || blackPiecesInBounds.size() > 1) return false; // enough pieces on the board
+
+        if(whitePiecesInBounds.size() == 0 && blackPiecesInBounds.size() == 0) return true; // only two kings
+
+        // past this point, at least one side has only 1 piece left (excluding kings)
+
+        if(whitePiecesInBounds.size() == 1 && blackPiecesInBounds.size() == 1) {
+            ChessPiece possibleBishop1 = whitePiecesInBounds.getFirst();
+            ChessPiece possibleBishop2 = blackPiecesInBounds.getFirst();
+
+            // exit if any remaining piece isn't a bishop
+            if(!possibleBishop1.getName().contains("Bishop") || !possibleBishop2.getName().contains("Bishop")) return false;
+
+            // if both bishops are on the same colored square, there is insufficient material
+            Pos pos1 = possibleBishop1.currentPos;
+            Pos pos2 = possibleBishop2.currentPos;
+
+            return pos1.first() + pos1.second() % 2 == pos2.first() + pos2.second() % 2;
+        }
+
+        // now there is only one piece to look at - if it is a knight or bishop there is insufficient material
+        ChessPiece onlyPieceOnBoard = whitePiecesInBounds.size() == 1 ? whitePiecesInBounds.getFirst() : blackPiecesInBounds.getFirst();
+
+        return onlyPieceOnBoard.getName().contains("Knight") || onlyPieceOnBoard.getName().contains("Bishop");
+    }
+    // the logic behind this method is implemented in the Move and related derived classes
+    // TODO: make sure fifty move rule is properly implemented
+    public boolean fiftyMoveRuleValid() {
+        return fiftyMoveCounter == 50;
     }
 
     // generates moves and makes sure they do not cause the player to lose
@@ -215,7 +286,7 @@ public class Board {
             }
         }
 
-        // get rid of moves that are not valid - they cause checks
+        // get rid of invalid moves that are stored on a given piece
         while(destroyList.size() > 0) {
             Move destroyMove = destroyList.getFirst();
             ChessPiece piece = retrievePiece(destroyMove.movingIdentifier);

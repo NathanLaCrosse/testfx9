@@ -1,6 +1,8 @@
 // this class acts as a mediator between the board tiles and the game controller
 // allows the end user to play the game
 
+// note: most of the piece & tile selection code is actually in 
+
 import java.util.LinkedList;
 
 public class Player extends Entity {

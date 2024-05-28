@@ -3,6 +3,8 @@
 import java.util.Objects;
 
 public class Move {
+    protected int previousFiftyCounter;
+
     protected Pos destination;
     protected Pos originalPosition; // in regards to moving piece
     protected String movingIdentifier;
@@ -12,6 +14,7 @@ public class Move {
     private ChessPiece storedCapture;
 
     public Move(Board referenceBoard, Pos destination, Pos originalPosition, String movingIdentifier, String capturedIdentifier) {
+        this.previousFiftyCounter = referenceBoard.fiftyMoveCounter;
         this.referenceBoard = referenceBoard;
         this.destination = new Pos(destination);
         this.originalPosition = new Pos(originalPosition);
@@ -30,7 +33,13 @@ public class Move {
 
         movingPiece.currentPos = destination;
         storedCapture = referenceBoard.retrievePiece(destination);
-        if(storedCapture != null) storedCapture.currentPos = null;
+
+        if(storedCapture != null) {
+            storedCapture.currentPos = null;
+            referenceBoard.fiftyMoveCounter = 0;
+        }else {
+            referenceBoard.fiftyMoveCounter++;
+        }
 
         referenceBoard.setIdentifierAtPos(originalPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
@@ -46,7 +55,12 @@ public class Move {
         }
 
         movingPiece.currentPos = originalPosition;
-        if(storedCapture != null) storedCapture.currentPos = destination;
+        if(storedCapture != null) {
+            storedCapture.currentPos = destination;
+            referenceBoard.fiftyMoveCounter = previousFiftyCounter;
+        }else {
+            referenceBoard.fiftyMoveCounter--;
+        }
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(destination, capturedIdentifier);

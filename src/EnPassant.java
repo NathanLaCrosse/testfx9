@@ -19,6 +19,8 @@ public class EnPassant extends Move {
         referenceBoard.setIdentifierAtPos(originalPosition, "");
         referenceBoard.setIdentifierAtPos(capturedPawnPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
+
+        referenceBoard.fiftyMoveCounter = 0;
     }
 
     @Override
@@ -29,5 +31,7 @@ public class EnPassant extends Move {
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(capturedPawnPosition, capturedIdentifier);
         referenceBoard.setIdentifierAtPos(destination, "");
+
+        referenceBoard.fiftyMoveCounter = previousFiftyCounter;
     }
 }

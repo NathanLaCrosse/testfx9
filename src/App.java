@@ -3,7 +3,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-// TODO: I FORGOT ABOUT PAWN PROMOTIONS LMAO
+// TODO: implement choosing which piece you want to promote to
+// TODO: Draw after repeating the same board position 3 times (do we really need this for a chess bot program?!?)
 
 public class App extends Application {
 
