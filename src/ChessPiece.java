@@ -96,7 +96,7 @@ public class ChessPiece {
             int sequenceCounter = 0;
             int sequenceDex = modifier.indexOf("I");
             if(sequenceDex != -1) {
-                sequence = Integer.parseInt(modifier.substring(modifier.indexOf("I") + 1, modifier.indexOf("I") + 2));
+                sequence = Integer.parseInt(modifier.substring(sequenceDex + 1, sequenceDex + 2));
             }
 
             // a starting sequence repeats only when it hasnt moved (there will still be one move if it has moved) ex: SI3|NE

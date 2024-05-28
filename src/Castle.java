@@ -18,8 +18,8 @@ public class Castle extends Move {
         referenceBoard.retrievePiece(rookOriginalPosition).currentPos = rookDest;
 
         referenceBoard.setIdentifierAtPos(originalPosition, "");
-        referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
         referenceBoard.setIdentifierAtPos(rookOriginalPosition, "");
+        referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
         referenceBoard.setIdentifierAtPos(rookDest, rookIdentifier);
     }
 
@@ -28,10 +28,10 @@ public class Castle extends Move {
         referenceBoard.retrievePiece(destination).currentPos = originalPosition;
         referenceBoard.retrievePiece(rookDest).currentPos = rookOriginalPosition;
 
-        referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(destination, "");
-        referenceBoard.setIdentifierAtPos(rookOriginalPosition, rookIdentifier);
         referenceBoard.setIdentifierAtPos(rookDest, "");
+        referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
+        referenceBoard.setIdentifierAtPos(rookOriginalPosition, rookIdentifier);
     }
 
     public Pos getRookDest() {

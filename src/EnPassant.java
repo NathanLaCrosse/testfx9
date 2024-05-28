@@ -13,7 +13,7 @@ public class EnPassant extends Move {
     @Override
     public void move() {
         referenceBoard.retrievePiece(originalPosition).currentPos = destination;
-        storedCapture = referenceBoard.retrievePiece(destination);
+        storedCapture = referenceBoard.retrievePiece(capturedIdentifier);
         storedCapture.currentPos = null;
 
         referenceBoard.setIdentifierAtPos(originalPosition, "");
@@ -23,7 +23,8 @@ public class EnPassant extends Move {
 
     @Override
     public void undoMove() {
-        referenceBoard.retrievePiece(destination).currentPos = destination;
+        referenceBoard.retrievePiece(destination).currentPos = originalPosition;
+        storedCapture.currentPos = capturedPawnPosition;
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(capturedPawnPosition, capturedIdentifier);

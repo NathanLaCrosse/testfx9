@@ -49,34 +49,69 @@ public class Board {
             }
         }
 
-        // TODO: get rid of this testing code and properly set up the board
-        // first character is important: W = white, B = black
-        identifierMap[7][3] = "WKing";
-        identifierMap[7][7] = "WRook";
-        identifierMap[0][0] = "BKing";
-        identifierMap[7][4] = "BRook";
-        identifierMap[4][7] = "BBishop";
+        // set up board state
+        for(int i = 0; i < 2; i++) {
+            // variables which change depending on side
+            boolean side = i == 0;
+            String sideStr = side ? "White" : "Black";
 
-        ChessPiece whiteKing = new King(this, new Pos(7,3), true);
-        ChessPiece whiteRook = new ChessPiece(this, new Pos(7,7), "Rook", true, 5, ChessPiece.ROOK_MOVES);
-        ChessPiece blackKing = new King(this, new Pos(0, 0), false);
-        ChessPiece blackRook = new ChessPiece(this, new Pos(7,4), "Rook", false, 5, ChessPiece.ROOK_MOVES);
-        ChessPiece blackBishop = new ChessPiece(this, new Pos(4,7), "Bishop", false, 3, ChessPiece.BISHOP_MOVES);
+            // add pawns
+            int pawnRow = side ? 6 : 1;
+            for(int k = 0; k < 8; k++) {
+                Pos position = new Pos(pawnRow, k);
+                Pawn pawn = new Pawn(this, position, side);
 
-        pieceMap.put("WKing", whiteKing);
-        pieceMap.put("WRook", whiteRook);
-        pieceMap.put("BKing", blackKing);
-        pieceMap.put("BRook", blackRook);
-        pieceMap.put("BBishop", blackBishop);
+                if(side) {
+                    whitePieces.add(pawn);
+                }else {
+                    blackPieces.add(pawn);
+                }
 
-        this.whiteKing = whiteKing;
-        this.blackKing = blackKing;
+                String identifier = sideStr + "Pawn" + k;
+                identifierMap[position.first()][position.second()] = identifier;
+                pieceMap.put(identifier, pawn);
+            }
 
-        whitePieces.add(whiteKing);
-        whitePieces.add(whiteRook);
-        blackPieces.add(blackKing);
-        blackPieces.add(blackRook);
-        blackPieces.add(blackBishop);
+            int mainRow = side ? 7 : 0; // row king is on
+
+            LinkedList<ChessPiece> mainRowPieces = new LinkedList<>();
+
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 0), "Rook", side, 5, ChessPiece.ROOK_MOVES));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 7), "Rook", side, 5, ChessPiece.ROOK_MOVES));
+
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 1), "Knight", side, 3, ChessPiece.KNIGHT_MOVES));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 6), "Knight", side, 3, ChessPiece.KNIGHT_MOVES));
+
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 2), "Bishop", side, 3, ChessPiece.BISHOP_MOVES));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 5), "Bishop", side, 3, ChessPiece.BISHOP_MOVES));
+
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 3), "Queen", side, 9, ChessPiece.QUEEN_MOVES));
+            ChessPiece king = new King(this, new Pos(mainRow, 4), side);
+            mainRowPieces.add(king);
+
+            if(side) {
+                whiteKing = king;
+            }else {
+                blackKing = king;
+            }
+
+            int increment = 0;
+            for(ChessPiece piece : mainRowPieces) {
+                String identifier = sideStr + piece.getName() + increment;
+
+                identifierMap[piece.currentPos.first()][piece.currentPos.second()] = identifier;
+                pieceMap.put(identifier, piece);
+
+                if(side) {
+                    whitePieces.add(piece);
+                }else {
+                    blackPieces.add(piece);
+                }
+
+                increment++;
+            }
+
+        }
         
     }
 
@@ -170,7 +205,7 @@ public class Board {
                         checkPresent = enemy.attacksSquare(c.getRookDest()) || enemy.attacksSquare(myKing.currentPos);
                     }
                 }
-
+                
                 // only add this move to our sanitized list if it doesn't lead into a check
                 if(!checkPresent) {
                     sanitizedList.add(m);

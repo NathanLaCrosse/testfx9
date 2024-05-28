@@ -7,13 +7,16 @@ public class Pawn extends ChessPiece {
         super(referenceBoard, startingPos, "Pawn", side, 1, DEFAULT_PAWN_MOVES);
     }
     
+    // TODO: En passant not working 
     @Override
     public void generateMoves() {
         super.generateMoves(); // find default moves
 
+        if(currentPos == null) return; // return if we are out of bounds
+
         // special case: en passant
         // can capture pawn and move forward one if it used its starting move last turn
-        Pos[] possibleTargets = new Pos[]{currentPos.returnModified(-1, 0), currentPos.returnModified(1, 0)};
+        Pos[] possibleTargets = new Pos[]{currentPos.returnModified(0, -1), currentPos.returnModified(0, 1)};
 
         for(int i = 0; i < possibleTargets.length; i++) {
             if(!referenceBoard.inBounds(possibleTargets[i])) continue; // skip over nodes outside of map
@@ -22,9 +25,9 @@ public class Pawn extends ChessPiece {
             if(possiblePiece != null && possiblePiece.getSide() != side && possiblePiece instanceof Pawn && ((Pawn)possiblePiece).madeStartingMoveLastTurn) {
                 Pos dest = null; 
                 if(side) {
-                    dest = currentPos.returnModified(0, -1);
+                    dest = possibleTargets[i].returnModified(-1, 0);
                 }else {
-                    dest = currentPos.returnModified(0, 1);
+                    dest = possibleTargets[i].returnModified(1, 0);
                 }
 
                 moves.put(dest, new EnPassant(referenceBoard, dest, currentPos, referenceBoard.getIdentifierAtPos(currentPos), referenceBoard.getIdentifierAtPos(possibleTargets[i]), possibleTargets[i]));
@@ -32,9 +35,9 @@ public class Pawn extends ChessPiece {
         }
     }
 
-    // this method enables the en passant flag if this piece has just moved
-    public void checkIfUsedStartingMove() {
-        if((int)Math.abs(currentPos.first() - startingPos.first()) == 2) {
+    // this method enables the en passant flag if this piece has just moved 2 spaces
+    public void checkIfUsedStartingMove(Move m) {
+        if(Math.abs(m.destination.first() - m.originalPosition.first()) == 2) {
             madeStartingMoveLastTurn = true;
         }else {
             madeStartingMoveLastTurn = false;

@@ -22,14 +22,17 @@ public class GameController {
         return gameBoard;
     }
 
-    public void nextTurn() {
+    // returns true if the current entity is in checkmate
+    public boolean nextTurn() {
         LinkedList<Move> validMoves = gameBoard.generateSanitizedMovesForSide(turn);
+        if(validMoves.size() == 0) return true;
 
         Move moveToPlay = currentPlayer().selectMoveToPlay(validMoves, gameBoard.getPiecesOnSide(turn));
-
         moveToPlay.move();
+        currentPlayer().reset();
 
         turn = !turn;
+        return false;
     }
 
     public Entity currentPlayer() {

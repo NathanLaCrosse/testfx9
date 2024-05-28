@@ -13,5 +13,11 @@ public class RandBot extends Entity {
 
         return validMoves.get(randDex);
     }
+
+    // does nothing - doesn't need to reset anything
+    @Override
+    public void reset() {
+        
+    }
     
 }

@@ -12,4 +12,7 @@ public abstract class Entity {
     // this method will be defined by derived class to give a unique way to select a "best" move
     public abstract Move selectMoveToPlay(LinkedList<Move> validMoves, LinkedList<ChessPiece> pieces);
 
+    // override this method if any variables need resetting after a move is played
+    public abstract void reset();
+
 }

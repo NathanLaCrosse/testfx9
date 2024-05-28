@@ -25,7 +25,7 @@ public class Move {
         ChessPiece movingPiece = referenceBoard.retrievePiece(originalPosition);
         if(movingPiece instanceof Pawn) {
             Pawn p = (Pawn)movingPiece;
-            p.checkIfUsedStartingMove();
+            p.checkIfUsedStartingMove(this);
         }
 
         movingPiece.currentPos = destination;
