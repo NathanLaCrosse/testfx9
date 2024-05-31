@@ -17,16 +17,14 @@ public class VisualGameControllerThread extends Thread {
     public void run() {
 
         // wait a little time in case the move is instantly found (some other stuff needs to get set up first)
-        try {
-            sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        
 
         // runs until checkmate
         while(!chessGUI.getGameController().nextTurn()) {
             chessGUI.updateSprites();
         }
+
+        chessGUI.startNewGame(new RandBot(true), new StageOneBot(false));
 
         complete = true;
     }

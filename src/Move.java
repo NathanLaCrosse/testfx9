@@ -20,12 +20,22 @@ public class Move {
         this.originalPosition = new Pos(originalPosition);
         this.movingIdentifier = movingIdentifier;
         this.capturedIdentifier = capturedIdentifier;
+
+        if(movingIdentifier.equals("") || referenceBoard.retrievePiece(originalPosition) == null) {
+            try {
+                throw new Exception("NO MOVING IDENTIFIER");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // executes the move
     public void move() {
+        System.out.println(this);
+        System.out.println(movingIdentifier);
         // en passant checks (enable/disable flag)
-        ChessPiece movingPiece = referenceBoard.retrievePiece(originalPosition);
+        ChessPiece movingPiece = referenceBoard.retrievePiece(movingIdentifier);
         if(movingPiece instanceof Pawn) {
             Pawn p = (Pawn)movingPiece;
             p.checkIfUsedStartingMove(this);
@@ -48,7 +58,9 @@ public class Move {
     // undos the move - assumes this in done in the correct order (no other moves made)
     public void undoMove() {
         // disable any enabled en passant flag
-        ChessPiece movingPiece = referenceBoard.retrievePiece(destination);
+        System.out.println(this);
+        System.out.println(movingIdentifier);
+        ChessPiece movingPiece = referenceBoard.retrievePiece(movingIdentifier);
         if(movingPiece instanceof Pawn) {
             Pawn p = (Pawn)movingPiece;
             p.disableEnPasantFlag();

@@ -8,12 +8,11 @@ import java.util.LinkedList;
 public class Player extends Entity {
     private ChessPiece selectedPiece = null;
     private Move selectedMove = null;
-    private boolean side;
 
     private Thread myThread = null;
 
     public Player(boolean side) {
-        this.side = side;
+        super(side);
     }
 
     public boolean getSide() {
@@ -21,7 +20,7 @@ public class Player extends Entity {
     }
 
     @Override
-    public Move selectMoveToPlay(LinkedList<Move> validMoves, LinkedList<ChessPiece> pieces) {
+    public Move selectMoveToPlay(LinkedList<Move> validMoves, Board gameBoard) {
 
         // wait until move has been selected (sleep thread we are on)
         while(selectedMove == null) {

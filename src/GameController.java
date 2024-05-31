@@ -32,30 +32,11 @@ public class GameController {
         LinkedList<Move> validMoves = gameBoard.generateSanitizedMovesForSide(turn);
 
         // check for possible ends to the game
-        if(validMoves.size() == 0) { 
-            if(gameBoard.inCheck(turn)) { // we are in checkmate
-                endCondition = 0;
-                System.out.println("Checkmate!");
-            }else { // otherwise it is a stalemate
-                endCondition = 1; 
-                System.out.println("Stalemate!");
-            }
-
-            return true;
-        }else if(gameBoard.insufficientMaterial()) {
-            endCondition = 2;
-            System.out.println("Insufficient Material!");
-
-            return true;
-        }else if(gameBoard.fiftyMoveRuleValid()) {
-            endCondition = 3;
-            System.out.println("Fifty Move Rule Violated!");
-            
-            return true;
-        }
+        System.out.println(gameBoard.getEndCondition(turn));
+        if(gameBoard.getEndCondition(turn) != -1) return true;
 
         // continue the game
-        Move moveToPlay = currentPlayer().selectMoveToPlay(validMoves, gameBoard.getPiecesOnSide(turn));
+        Move moveToPlay = currentPlayer().selectMoveToPlay(validMoves, gameBoard);
         moveToPlay.move();
         currentPlayer().reset();
 

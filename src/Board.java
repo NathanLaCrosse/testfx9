@@ -60,7 +60,9 @@ public class Board {
             int pawnRow = side ? 6 : 1;
             for(int k = 0; k < 8; k++) {
                 Pos position = new Pos(pawnRow, k);
-                Pawn pawn = new Pawn(this, position, side);
+                String identifier = sideStr + "Pawn" + k;
+
+                Pawn pawn = new Pawn(this, position, side, identifier);
 
                 if(side) {
                     whitePieces.add(pawn);
@@ -68,26 +70,25 @@ public class Board {
                     blackPieces.add(pawn);
                 }
 
-                String identifier = sideStr + "Pawn" + k;
                 identifierMap[position.first()][position.second()] = identifier;
                 pieceMap.put(identifier, pawn);
             }
 
-            int mainRow = side ? 7 : 0; // row king is on
+            int mainRow = side ? dimY - 1 : 0; // row king is on
 
             LinkedList<ChessPiece> mainRowPieces = new LinkedList<>();
 
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 0), "Rook", side, 5, ChessPiece.ROOK_MOVES));
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 7), "Rook", side, 5, ChessPiece.ROOK_MOVES));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 0), "Rook", side, 5, ChessPiece.ROOK_MOVES, ""));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 7), "Rook", side, 5, ChessPiece.ROOK_MOVES, ""));
 
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 1), "Knight", side, 3, ChessPiece.KNIGHT_MOVES));
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 6), "Knight", side, 3, ChessPiece.KNIGHT_MOVES));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 1), "Knight", side, 3, ChessPiece.KNIGHT_MOVES, ""));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 6), "Knight", side, 3, ChessPiece.KNIGHT_MOVES, ""));
 
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 2), "Bishop", side, 3, ChessPiece.BISHOP_MOVES));
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 5), "Bishop", side, 3, ChessPiece.BISHOP_MOVES));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 2), "Bishop", side, 3, ChessPiece.BISHOP_MOVES, ""));
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 5), "Bishop", side, 3, ChessPiece.BISHOP_MOVES, ""));
 
-            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 3), "Queen", side, 9, ChessPiece.QUEEN_MOVES));
-            ChessPiece king = new King(this, new Pos(mainRow, 4), side);
+            mainRowPieces.add(new ChessPiece(this, new Pos(mainRow, 3), "Queen", side, 9, ChessPiece.QUEEN_MOVES, ""));
+            ChessPiece king = new King(this, new Pos(mainRow, 4), side, "");
             mainRowPieces.add(king);
 
             if(side) {
@@ -102,6 +103,7 @@ public class Board {
 
                 identifierMap[piece.currentPos.first()][piece.currentPos.second()] = identifier;
                 pieceMap.put(identifier, piece);
+                piece.setIdentifier(identifier);
 
                 if(side) {
                     whitePieces.add(piece);
@@ -193,15 +195,15 @@ public class Board {
         for(ChessPiece piece : whitePieces) {
             if(inBounds(piece.currentPos) && !(piece instanceof King)) {
                 whitePiecesInBounds.add(piece);
+                if(whitePiecesInBounds.size() > 1) return false; // enough pieces on board
             }
         }
         for(ChessPiece piece : blackPieces) {
             if(inBounds(piece.currentPos) && !(piece instanceof King)) {
                 blackPiecesInBounds.add(piece);
+                if(blackPiecesInBounds.size() > 1) return false; // enough pieces on board
             }
         }
-
-        if(whitePiecesInBounds.size() > 1 || blackPiecesInBounds.size() > 1) return false; // enough pieces on the board
 
         if(whitePiecesInBounds.size() == 0 && blackPiecesInBounds.size() == 0) return true; // only two kings
 
@@ -231,6 +233,38 @@ public class Board {
     public boolean fiftyMoveRuleValid() {
         return fiftyMoveCounter == 50;
     }
+    // returns -1 if the board isnt in a end state. If it is in an ending state, then expect values from 0-3
+    // this method should be called after a call to valid moves for its side
+    // 0 - insufficient material
+    // 1 - fifty move rule
+    // 2 - checkmate
+    // 3 - stalemate
+    public int getEndCondition(boolean side) {
+        if(insufficientMaterial()) return 0;
+        if(fiftyMoveRuleValid()) return 1;
+
+        // check for valid moves
+        for(ChessPiece piece : getPiecesOnSide(side)) {
+            if(piece.getMoves().size() > 0) return -1;
+        }
+
+        // no moves past this point
+        if(inCheck(side)) return 2; // checkmate
+        else return 3; // stalemate
+    }
+
+    // note: kings are not counted in material checking
+    public int materialOnSide(boolean side) {
+        LinkedList<ChessPiece> pieces = getPiecesOnSide(side);
+
+        int total = 0;
+        for(ChessPiece piece : pieces) {
+            if(!inBounds(piece.currentPos) || piece instanceof King) continue; // skip over if out of bounds or king
+
+            total += piece.getMaterial();
+        }
+        return total;
+    }
 
     // generates moves and makes sure they do not cause the player to lose
     public LinkedList<Move> generateSanitizedMovesForSide(boolean side) {
@@ -249,7 +283,7 @@ public class Board {
             
             for(Move m : possibleMoves.values()) {
                 boolean checkPresent = false;
-                Iterator<ChessPiece> itr = enemyPieces.iterator();
+                Iterator<ChessPiece> itr = enemyPieces.iterator();         
 
                 // make move to test this new board state
                 m.move();
@@ -272,7 +306,7 @@ public class Board {
 
                     while(itr.hasNext() && !checkPresent) {
                         ChessPiece enemy = itr.next();
-                        enemy.generateMoves();
+                        //enemy.generateMoves();
                         checkPresent = enemy.attacksSquare(c.getRookDest()) || enemy.attacksSquare(myKing.currentPos);
                     }
                 }

@@ -19,6 +19,7 @@ public class ChessPiece {
     protected Pos currentPos;
 
     protected String name;
+    private String identifier;
 
     protected boolean side;
     protected int material;
@@ -30,7 +31,7 @@ public class ChessPiece {
 
     protected HashMap<Pos, Move> moves; // moves will be used infrequently, so using a linked list for fast addition + removal
 
-    public ChessPiece(Board referenceBoard, Pos startingPos, String name, boolean side, int material, String[] moveInstructions) {
+    public ChessPiece(Board referenceBoard, Pos startingPos, String name, boolean side, int material, String[] moveInstructions, String identifier) {
         this.referenceBoard = referenceBoard;
 
         this.name = name;
@@ -42,9 +43,10 @@ public class ChessPiece {
 
         this.startingPos = startingPos;
         this.currentPos = new Pos(startingPos);
+        this.identifier = identifier;
     }
-    public ChessPiece(Board referenceBoard, Pos startingPos, boolean side, int material, String[] moveInstructions) {
-        this(referenceBoard, startingPos, "Placeholder", side, material, moveInstructions);
+    public ChessPiece(Board referenceBoard, Pos startingPos, boolean side, int material, String[] moveInstructions, String identifier) {
+        this(referenceBoard, startingPos, "Placeholder", side, material, moveInstructions, identifier);
     }
 
     public String getName() {
@@ -63,6 +65,10 @@ public class ChessPiece {
         return !startingPos.equals(currentPos);
     }
 
+    protected void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
     public boolean attacksSquare(Pos pos) {
         return moves.get(pos) != null;
     }
@@ -75,7 +81,12 @@ public class ChessPiece {
     // this method returns the node the piece is currently on to be used in any derived classes
     public void generateMoves() {
         moves = new HashMap<>();
-        if(currentPos == null) return;
+        
+        if(currentPos != null) {
+            referenceBoard.setIdentifierAtPos(currentPos, identifier);
+        }else {
+            return;
+        }
 
         for(int i = 0; i < moveInstructions.length; i++) {
             boolean nonLoopingFlag = false;
@@ -112,7 +123,7 @@ public class ChessPiece {
                 if(destPiece == null) {
                     if(onlyCapture) break;
 
-                    if(this instanceof Pawn && referenceBoard.inPromotionRank(side, destCoords.first()) && name.equals("Pawn")) {
+                    if(this instanceof Pawn && name.equals("Pawn") && referenceBoard.inPromotionRank(side, destCoords.first())) {
                         moves.put(destCoords, new PawnPromotion(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), ""));
                     }else {
                         moves.put(destCoords, new Move(referenceBoard, destCoords, currentPos, referenceBoard.getIdentifierAtPos(currentPos), ""));

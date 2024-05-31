@@ -62,8 +62,8 @@ public class VisualChessGame {
         }
 
         // begin the game
-        gct.start();
         updateSprites();
+        gct.start();
         
         // at the end of the game, get rid of game controller
         // gc = null;

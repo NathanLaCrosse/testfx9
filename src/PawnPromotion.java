@@ -3,7 +3,7 @@ public class PawnPromotion extends Move {
     // right now it defaults to queen
     private String newName = "Queen";
     private String[] newMoves = ChessPiece.QUEEN_MOVES;
-    private ChessPiece storedCapture = null;
+    private ChessPiece storedCapture;
 
     public PawnPromotion(Board referenceBoard, Pos destination, Pos originalPosition, String movingIdentifier, String capturedIdentifier) {
         super(referenceBoard, destination, originalPosition, movingIdentifier, capturedIdentifier);
@@ -11,9 +11,7 @@ public class PawnPromotion extends Move {
     
     @Override
     public void move() {
-        System.out.println("Pawn promoted!");
-
-        ChessPiece movingPiece = referenceBoard.retrievePiece(originalPosition);
+        ChessPiece movingPiece = referenceBoard.retrievePiece(movingIdentifier);
         movingPiece.currentPos = destination;
         movingPiece.name = newName;
         movingPiece.moveInstructions = newMoves;

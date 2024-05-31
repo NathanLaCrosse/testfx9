@@ -12,7 +12,7 @@ public class EnPassant extends Move {
 
     @Override
     public void move() {
-        referenceBoard.retrievePiece(originalPosition).currentPos = destination;
+        referenceBoard.retrievePiece(movingIdentifier).currentPos = destination;
         storedCapture = referenceBoard.retrievePiece(capturedIdentifier);
         storedCapture.currentPos = null;
 

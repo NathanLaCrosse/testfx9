@@ -3,8 +3,8 @@
 public class Pawn extends ChessPiece {
     private boolean madeStartingMoveLastTurn = false;
 
-    public Pawn(Board referenceBoard, Pos startingPos, boolean side) {
-        super(referenceBoard, startingPos, "Pawn", side, 1, DEFAULT_PAWN_MOVES);
+    public Pawn(Board referenceBoard, Pos startingPos, boolean side, String identifier) {
+        super(referenceBoard, startingPos, "Pawn", side, 1, DEFAULT_PAWN_MOVES, identifier);
     }
     
     @Override

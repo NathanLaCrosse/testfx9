@@ -2,8 +2,8 @@
 public class King extends ChessPiece {
 
     // the king requires the board as it needs to search for its rooks
-    public King(Board referenceBoard, Pos startingPos, boolean side) {
-        super(referenceBoard, startingPos,"King", side, 0, ChessPiece.DEFAULT_KING_MOVES);
+    public King(Board referenceBoard, Pos startingPos, boolean side, String identifier) {
+        super(referenceBoard, startingPos,"King", side, 0, ChessPiece.DEFAULT_KING_MOVES, identifier);
     }
     
     @Override
@@ -11,7 +11,7 @@ public class King extends ChessPiece {
         super.generateMoves(); // generate default moves
 
         // special case: castling
-        if(hasMoved()) return;
+        if(hasMoved() || currentPos == null) return;
 
         Pos[] possiblePosi = new Pos[]{new Pos(currentPos.first(),0), new Pos(currentPos.first(), referenceBoard.getDimX() - 1)};
 

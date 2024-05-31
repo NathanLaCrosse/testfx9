@@ -4,13 +4,14 @@
 import java.util.LinkedList;
 
 public abstract class Entity {
+    protected boolean side;
     
-    public Entity() {
-
+    public Entity(boolean side) {
+        this.side = side;
     }
 
     // this method will be defined by derived class to give a unique way to select a "best" move
-    public abstract Move selectMoveToPlay(LinkedList<Move> validMoves, LinkedList<ChessPiece> pieces);
+    public abstract Move selectMoveToPlay(LinkedList<Move> validMoves, Board gameBoard);
 
     // override this method if any variables need resetting after a move is played
     public abstract void reset();
