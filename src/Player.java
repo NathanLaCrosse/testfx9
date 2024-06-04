@@ -9,8 +9,6 @@ public class Player extends Entity {
     private ChessPiece selectedPiece = null;
     private Move selectedMove = null;
 
-    private Thread myThread = null;
-
     public Player(boolean side) {
         super(side);
     }
@@ -25,7 +23,7 @@ public class Player extends Entity {
         // wait until move has been selected (sleep thread we are on)
         while(selectedMove == null) {
             try {
-                myThread.sleep(500);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -49,11 +47,6 @@ public class Player extends Entity {
     }
     public ChessPiece getSelectedPiece() {
         return selectedPiece;
-    }
-
-    // sets the thread so we can pause it while waiting
-    public void setThread(Thread t) {
-        this.myThread = t;
     }
 
     @Override

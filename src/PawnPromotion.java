@@ -26,6 +26,8 @@ public class PawnPromotion extends Move {
 
         referenceBoard.setIdentifierAtPos(originalPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
+
+        referenceBoard.incrementMovesMade();
     }
 
     @Override 
@@ -44,5 +46,7 @@ public class PawnPromotion extends Move {
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(destination, capturedIdentifier);
+
+        referenceBoard.decrementMovesMade();
     }
 }

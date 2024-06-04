@@ -21,6 +21,8 @@ public class EnPassant extends Move {
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
 
         referenceBoard.fiftyMoveCounter = 0;
+
+        referenceBoard.incrementMovesMade();
     }
 
     @Override
@@ -33,5 +35,7 @@ public class EnPassant extends Move {
         referenceBoard.setIdentifierAtPos(destination, "");
 
         referenceBoard.fiftyMoveCounter = previousFiftyCounter;
+
+        referenceBoard.decrementMovesMade();
     }
 }

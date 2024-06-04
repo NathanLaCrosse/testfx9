@@ -30,10 +30,15 @@ public class Move {
         }
     }
 
+    public ChessPiece getMovingPiece() {
+        return referenceBoard.retrievePiece(movingIdentifier);
+    }
+    public ChessPiece getCapturedPiece() {
+        return referenceBoard.retrievePiece(capturedIdentifier);
+    }
+
     // executes the move
     public void move() {
-        System.out.println(this);
-        System.out.println(movingIdentifier);
         // en passant checks (enable/disable flag)
         ChessPiece movingPiece = referenceBoard.retrievePiece(movingIdentifier);
         if(movingPiece instanceof Pawn) {
@@ -53,13 +58,13 @@ public class Move {
 
         referenceBoard.setIdentifierAtPos(originalPosition, "");
         referenceBoard.setIdentifierAtPos(destination, movingIdentifier);
+
+       referenceBoard.incrementMovesMade();
     }
 
     // undos the move - assumes this in done in the correct order (no other moves made)
     public void undoMove() {
         // disable any enabled en passant flag
-        System.out.println(this);
-        System.out.println(movingIdentifier);
         ChessPiece movingPiece = referenceBoard.retrievePiece(movingIdentifier);
         if(movingPiece instanceof Pawn) {
             Pawn p = (Pawn)movingPiece;
@@ -76,6 +81,8 @@ public class Move {
 
         referenceBoard.setIdentifierAtPos(originalPosition, movingIdentifier);
         referenceBoard.setIdentifierAtPos(destination, capturedIdentifier);
+
+        referenceBoard.decrementMovesMade();
     }
 
     @Override 

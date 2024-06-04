@@ -23,6 +23,8 @@ public class Castle extends Move {
         referenceBoard.setIdentifierAtPos(rookDest, rookIdentifier);
 
         referenceBoard.fiftyMoveCounter++;
+
+        referenceBoard.incrementMovesMade();
     }
 
     @Override
@@ -36,6 +38,8 @@ public class Castle extends Move {
         referenceBoard.setIdentifierAtPos(rookOriginalPosition, rookIdentifier);
 
         referenceBoard.fiftyMoveCounter--;
+
+        referenceBoard.decrementMovesMade();
     }
 
     public Pos getRookDest() {

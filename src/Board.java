@@ -13,6 +13,7 @@ public class Board {
 
     private int dimX;
     private int dimY;
+    private int movesMade;
 
     private String[][] identifierMap; // contains a string representing a piece
     private HashMap<String, ChessPiece> pieceMap;
@@ -32,6 +33,7 @@ public class Board {
 
         this.dimX = dimX;
         this.dimY = dimY;
+        movesMade = 0;
 
         initializeBoard();
     }
@@ -125,6 +127,13 @@ public class Board {
             return blackPieces;
         }
     }
+    public ChessPiece getKingOnSide(boolean side) {
+        if(side) {
+            return whiteKing;
+        }else {
+            return blackKing;
+        }
+    }
 
     public int getDimX() {
         return dimX;
@@ -134,6 +143,16 @@ public class Board {
     }
     public String[][] getIdentifierMap() {
         return identifierMap;
+    }
+
+    protected void incrementMovesMade() {
+        movesMade++;
+    }
+    protected void decrementMovesMade() {
+        movesMade--;
+    }
+    public int getMovesMade() {
+        return movesMade;
     }
 
     public boolean inBounds(Pos p) {
@@ -266,6 +285,20 @@ public class Board {
         return total;
     }
 
+    // returns true if the enemy can attack a given position
+    // assumes that the enemy pieces have the latest moves generated on them
+    public boolean squareIsAttacked(Pos p, boolean side) {
+        LinkedList<ChessPiece> enemyPieces = side ? blackPieces : whitePieces;
+
+        for(ChessPiece piece : enemyPieces) {
+            if(piece.attacksSquare(p)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // generates moves and makes sure they do not cause the player to lose
     public LinkedList<Move> generateSanitizedMovesForSide(boolean side) {
         LinkedList<ChessPiece> enemyPieces = side ? blackPieces : whitePieces;
@@ -340,6 +373,20 @@ public class Board {
                 str += "" + (char)(A_VAL + dimY - 1 - i) + (k + 1) + " ";
             }
             str += "\n";
+        }
+        return str;
+    }
+
+    protected String generateBoardString() {
+        String str = "";
+        for(int i = 0; i < identifierMap.length; i++) {
+            for(int k = 0; k < identifierMap[0].length; k++) {
+                if(identifierMap[i][k].equals("")) {
+                    str += "BLANK";
+                }else {
+                    str += identifierMap[i][k];
+                }
+            }
         }
         return str;
     }

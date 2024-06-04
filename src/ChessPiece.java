@@ -82,9 +82,10 @@ public class ChessPiece {
     public void generateMoves() {
         moves = new HashMap<>();
         
-        if(currentPos != null) {
-            referenceBoard.setIdentifierAtPos(currentPos, identifier);
-        }else {
+        // if(currentPos != null && referenceBoard.retrievePiece(currentPos) == null) {
+        //     referenceBoard.setIdentifierAtPos(currentPos, identifier);
+        // }else 
+        if(currentPos == null) {
             return;
         }
 

@@ -3,6 +3,7 @@
 
 import java.util.HashMap;
 
+import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.image.Image;
@@ -16,6 +17,8 @@ public class VisualChessGame {
     private GameController gc;
     private VisualGameControllerThread gct;
     private HashMap<Pos, BoardTile> tileMap;
+
+    private boolean gameFinished;
 
     public VisualChessGame() {
         gc = null;
@@ -50,20 +53,28 @@ public class VisualChessGame {
 
     // starts a chess game and finishes once it's done
     public void startNewGame(Entity player1, Entity player2) {
-        gc = new GameController(player1, player2);
-        gct = new VisualGameControllerThread(this);
+        gameFinished = false;
 
-        // if any entities are players, set up their threads
-        if(player1 instanceof Player) {
-            ((Player)player1).setThread(gct);
-        }
-        if(player2 instanceof Player) {
-            ((Player)player2).setThread(gct);
-        }
+        gc = new GameController(player1, player2);
+
+        Task<Void> gameTask = new Task<Void>() {
+
+            @Override
+            protected Void call() throws Exception {
+                while(!getGameController().nextTurn()) {
+                    updateSprites();
+                }
+
+                //startNewGame(player1, player2);
+
+                return null;
+            }
+            
+        };
 
         // begin the game
         updateSprites();
-        gct.start();
+        new Thread(gameTask).start();
         
         // at the end of the game, get rid of game controller
         // gc = null;

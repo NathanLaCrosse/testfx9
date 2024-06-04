@@ -27,16 +27,32 @@ public class GameController {
         return endCondition;
     }
 
+    // TODO: Make sure board state is unchanged by either entity
     // returns true if the current entity is in checkmate
     public boolean nextTurn() {
+        String oldBoardState = gameBoard.generateBoardString();
+
         LinkedList<Move> validMoves = gameBoard.generateSanitizedMovesForSide(turn);
 
         // check for possible ends to the game
-        System.out.println(gameBoard.getEndCondition(turn));
-        if(gameBoard.getEndCondition(turn) != -1) return true;
+        int endCondition = gameBoard.getEndCondition(turn);
+        if(endCondition == 2) {
+            System.out.println((turn ? "White" : "Black") + " is checkmated!");
+            return true;
+        }else if(endCondition != -1) {
+            System.out.println("Draw.");
+            return true;
+        }
 
         // continue the game
         Move moveToPlay = currentPlayer().selectMoveToPlay(validMoves, gameBoard);
+
+        // check if the board was somehow modified by a bot
+        if(!oldBoardState.equals(gameBoard.generateBoardString())) {
+            System.out.println("Illegal modification present!");
+            return true;
+        }
+
         moveToPlay.move();
         currentPlayer().reset();
 
