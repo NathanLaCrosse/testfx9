@@ -57,25 +57,13 @@ public class VisualChessGame {
 
         gc = new GameController(player1, player2);
 
-        Task<Void> gameTask = new Task<Void>() {
-
-            @Override
-            protected Void call() throws Exception {
-                while(!getGameController().nextTurn()) {
-                    updateSprites();
-                }
-
-                //startNewGame(player1, player2);
-
-                return null;
-            }
-            
-        };
+    
 
         // begin the game
         updateSprites();
-        new Thread(gameTask).start();
-        
+        VisualGameControllerThread controlThread = new VisualGameControllerThread(this);
+        controlThread.start();
+
         // at the end of the game, get rid of game controller
         // gc = null;
         // gct = null;

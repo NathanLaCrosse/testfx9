@@ -68,7 +68,7 @@ public class StageOneBot extends Entity {
         score += 100 * materialAdvantage;
 
         if(gameBoard.inCheck(!side) ) {
-            score += 100;
+            score += 250;
         }
 
         // give extra points for good-looking moves
@@ -112,25 +112,25 @@ public class StageOneBot extends Entity {
                 // this will sometimes make moves like a queen capturing a free pawn unappealing
                 score += (capture.material - m.getMovingPiece().material) * 6;
             }
+
+            // encourage checks
+            if(capture.getName().equals("King")) {
+                score += 10;
+            }
         }
 
         score += gameBoard.squareIsAttacked(m.originalPosition, !side) ? 3 : 0;
         score -= gameBoard.squareIsAttacked(m.destination, !side) ? 3 : 0;
 
-        // encourage pawn moves early game as well as getting pieces
-        // if(m.getMovingPiece() instanceof Pawn && 5 - gameBoard.getMovesMade() >= 1) {
-        //     score += 14 * Math.log(5 - gameBoard.getMovesMade());
-        // }
+        //encourage pawn moves early game as well as getting pieces
+        if(m.getMovingPiece() instanceof Pawn && 5 - gameBoard.getMovesMade() >= 1) {
+            score += 14 * Math.log(5 - gameBoard.getMovesMade());
+        }
 
         // also encourage moving a piece if it hasn't moved already
         if(!m.getMovingPiece().hasMoved()) {
             score += 2;
         }
-
-        // encourage checks
-        // if(gameBoard.retrievePiece(m.destination).equals(gameBoard.getKingOnSide(!side))) {
-        //     score += 10;
-        // }
 
         return score;
     }
