@@ -29,7 +29,7 @@ public class Player extends Entity {
             }
         }
 
-        return selectedMove; // dummy value for now
+        return selectedMove; 
     }
 
     // selects a given move to play if the selected move is a valid move

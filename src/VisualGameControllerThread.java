@@ -1,35 +1,26 @@
 // this thread allows for the game controller to be working at the same time
 // as the GUI
+
+import javafx.application.Platform;
+
 public class VisualGameControllerThread extends Thread {
     private VisualChessGame chessGUI;
-    private boolean complete = false;
     
     public VisualGameControllerThread(VisualChessGame chessGUI) {
         this.chessGUI = chessGUI;
     }
 
-    public boolean finished() {
-        return complete;
-    }
-
     // use game controller to run game until it ends
     @Override
     public void run() {
-
-        // runs until checkmate
-        while(!chessGUI.getGameController().nextTurn()) {
+        Platform.runLater(() ->{
+            boolean end = chessGUI.getGameController().nextTurn();
             chessGUI.updateSprites();
-        }
 
-        try {
-            sleep(1000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        chessGUI.startNewGame(new RandBot(true), new StageOneBot(false));
-
-        complete = true;
+            if(!end) {
+                VisualGameControllerThread vgct = new VisualGameControllerThread(chessGUI);
+                vgct.start();
+            }
+        });
     }
 }
