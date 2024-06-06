@@ -20,6 +20,8 @@ public class VisualGameControllerThread extends Thread {
             if(!end) {
                 VisualGameControllerThread vgct = new VisualGameControllerThread(chessGUI);
                 vgct.start();
+            }else {
+                chessGUI.endGame();
             }
         });
     }

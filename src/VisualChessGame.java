@@ -50,6 +50,9 @@ public class VisualChessGame {
     protected GameController getGameController() {
         return gc;
     }
+    protected void endGame() {
+        gameFinished = true;
+    }
 
     // starts a chess game and finishes once it's done
     public void startNewGame(Entity player1, Entity player2) {

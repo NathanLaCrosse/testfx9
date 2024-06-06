@@ -23,6 +23,7 @@ public class Pawn extends ChessPiece {
             if(!referenceBoard.inBounds(possibleTargets[i])) continue; // skip over nodes outside of map
 
             ChessPiece possiblePiece = referenceBoard.retrievePiece(possibleTargets[i]);
+            // TODO: If you ever decide to work on this version again, this if statement doesn't properly check if the other piece is a pawn (could be promoted)
             if(possiblePiece != null && possiblePiece.getSide() != side && possiblePiece instanceof Pawn && ((Pawn)possiblePiece).madeStartingMoveLastTurn) {
                 Pos dest = null; 
                 if(side) {

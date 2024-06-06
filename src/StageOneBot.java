@@ -1,6 +1,7 @@
 // designed to be a simple bot yet stronger than randBot
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -30,11 +31,12 @@ public class StageOneBot extends Entity {
         // set up the board and obtain valid moves
         Collection<Move> validMoves = createOrderedMoves(gameBoard, sideToPlay);
 
+        //if(gameBoard.inCheck(!sideToPlay)) {return 1000;}
+
         // check for end states
         int endCon = gameBoard.getEndCondition(sideToPlay);
         if(endCon == 2) return Integer.MIN_VALUE; // checkmate
         if(endCon != -1) return -100; // some sort of draw
-        if(gameBoard.getEndCondition(!sideToPlay) == 2) return Integer.MAX_VALUE; // opponent is in checkmate
 
         double bestMoveVal = Integer.MIN_VALUE;
         double eval;
@@ -78,9 +80,11 @@ public class StageOneBot extends Entity {
         // }
 
         // bonus for least amount of king moves - to encourage checkmate
-        // create available moves for the king piece
-        gameBoard.generateSanitizedMovesForSide(!side);
-        score += 4 * Math.exp(4 - gameBoard.getKingOnSide(!side).getMoves().size());
+        int opponentKingMovesAttacked = 0;
+        for(Move m : gameBoard.getKingOnSide(!side).getMoves().values()) {
+            if(gameBoard.squareIsAttacked(m.destination, side)) opponentKingMovesAttacked++;
+        }
+        score += 40 * opponentKingMovesAttacked;
 
         return score;
     }
@@ -103,6 +107,7 @@ public class StageOneBot extends Entity {
     private double gradeMove(Board gameBoard, Move m, boolean side) {
         double score = 0;
 
+        ChessPiece moving = m.getMovingPiece();
         ChessPiece capture = m.getCapturedPiece();
         if(capture != null) {
             // create urgency to move out of a square, so we are less likely to leave pieces hanging
@@ -112,19 +117,14 @@ public class StageOneBot extends Entity {
                 // this will sometimes make moves like a queen capturing a free pawn unappealing
                 score += (capture.material - m.getMovingPiece().material) * 6;
             }
-
-            // encourage checks
-            if(capture.getName().equals("King")) {
-                score += 10;
-            }
         }
 
-        score += gameBoard.squareIsAttacked(m.originalPosition, !side) ? 3 : 0;
-        score -= gameBoard.squareIsAttacked(m.destination, !side) ? 3 : 0;
+        score += gameBoard.squareIsAttacked(m.originalPosition, !side) ? moving.material : 0;
+        score -= gameBoard.squareIsAttacked(m.destination, !side) ? moving.material : 0;
 
         //encourage pawn moves early game as well as getting pieces
         if(m.getMovingPiece() instanceof Pawn && 5 - gameBoard.getMovesMade() >= 1) {
-            score += 14 * Math.log(5 - gameBoard.getMovesMade());
+            score += 10;
         }
 
         // also encourage moving a piece if it hasn't moved already
